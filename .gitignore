@@ -15,7 +15,6 @@ env/
 # Sensitive / secrets - DO NOT COMMIT
 serviceAccountKey.json
 sa_temp.txt
-*.pkl
 
 # Node
 node_modules/
