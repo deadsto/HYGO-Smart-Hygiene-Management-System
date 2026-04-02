@@ -10,7 +10,7 @@ export default function StaffManagement() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/staff")
+    fetch("https://hygo-smart-hygiene-management-system-4os1.onrender.com/api/staff")
       .then((res) => res.json())
       .then((data) => setStaff(data))
       .catch((err) => console.error("Error fetching staff:", err));

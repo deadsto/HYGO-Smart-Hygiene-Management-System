@@ -16,8 +16,8 @@ const DashboardCards = () => {
 
       try {
 
-        const toiletsRes = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/toilets");
-        const alertsRes = await fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/alerts");
+        const toiletsRes = await fetch("https://hygo-smart-hygiene-management-system-4os1.onrender.com/api/toilets");
+        const alertsRes = await fetch("https://hygo-smart-hygiene-management-system-4os1.onrender.com/api/alerts");
 
         if (!toiletsRes.ok || !alertsRes.ok) {
           throw new Error("API error");

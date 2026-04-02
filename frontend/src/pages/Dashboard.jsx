@@ -16,17 +16,17 @@ function Dashboard() {
  const fetchData = ( ) => { 
      console.log("REFRESH CLICKED");  
   // Alerts
-  fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/cleaning-alerts")
+  fetch("https://hygo-smart-hygiene-management-system-4os1.onrender.com/api/cleaning-alerts")
     .then(res => res.json())
     .then(data => setAlerts(data));
 
   // Toilets
-  fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/toilets")
+  fetch("https://hygo-smart-hygiene-management-system-4os1.onrender.com/api/toilets")
     .then(res => res.json())
     .then(data => setToilets(data));
 
     //  (AI prediction)
-  fetch("https://hygo-smart-hygiene-management-system.onrender.com/api/predict-from-db")
+  fetch("https://hygo-smart-hygiene-management-system-4os1.onrender.com/api/predict-from-db")
     .then(res => res.json())
     .then(data => setPredictions(data))
     .catch(err => console.log("Prediction error:", err));

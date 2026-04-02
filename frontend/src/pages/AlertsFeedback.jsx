@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "../component/Sidebar";
 import "../styles/alert.css";
 
-const BASE_URL = "https://hygo-smart-hygiene-management-system.onrender.com";
+const BASE_URL = "https://hygo-smart-hygiene-management-system-4os1.onrender.com";
 
 export default function AlertsFeedback() {
   const [alerts, setAlerts] = useState([]);
