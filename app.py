@@ -18,7 +18,7 @@ except Exception as e:
     print(f"Model load error: {e}")
     model = None
 
-ODOUR_THRESHOLD = 70
+ODOUR_THRESHOLD = 6
 USAGE_THRESHOLD = 30
 CLEANING_TIME_LIMIT_HOURS = 6
 
@@ -181,28 +181,40 @@ def toilets():
     if request.method == "GET":
         try:
             toilet_docs = list(db.collection("toilets").stream())
+            
+            # Fetch all sensor data once to avoid needing a composite index
+            all_sensors = list(db.collection("sensor_data").stream())
+            latest_sensors = {}
+            for doc in all_sensors:
+                s = doc.to_dict()
+                tid = s.get("toilet_id")
+                # Maintain the latest timestamp for each toilet
+                if tid not in latest_sensors:
+                    latest_sensors[tid] = s
+                else:
+                    if s.get("timestamp") and latest_sensors[tid].get("timestamp"):
+                        if naive(s.get("timestamp")) > naive(latest_sensors[tid].get("timestamp")):
+                            latest_sensors[tid] = s
+
             result = []
             for doc in toilet_docs:
                 t = doc.to_dict()
-                # Latest sensor reading for this toilet
-                sensor_snap = db.collection("sensor_data")\
-                                 .where("toilet_id", "==", t.get("toilet_id"))\
-                                 .order_by("timestamp", direction=firestore.Query.DESCENDING)\
-                                 .limit(1).stream()
-                sensor = {}
-                for s in sensor_snap:
-                    sensor = s.to_dict()
-                    break
+                tid = t.get("toilet_id")
+                sensor = latest_sensors.get(tid, {})
                 t.update({
                     "odour_level": sensor.get("odour_level"),
                     "gas_value":   sensor.get("gas_value"),
                     "distance":    sensor.get("distance"),
                 })
-                if sensor.get("status"):
-                    t["status"] = sensor["status"]
+                # Check status case-insensitively
+                sensor_status = sensor.get("status")
+                if sensor_status:
+                    t["status"] = str(sensor_status).lower()
                 result.append(serialize(t))
             return jsonify(result), 200
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return jsonify({"error": str(e)}), 500
 
     if request.method == "POST":
@@ -234,23 +246,31 @@ def cleaning_alerts():
             d.to_dict().get("toilet_id"): d.to_dict()
             for d in db.collection("toilets").stream()
         }
+        
+        all_sensors = list(db.collection("sensor_data").stream())
+        # Sort manually to avoid composite index
+        all_sensors.sort(key=lambda d: naive(d.to_dict().get("timestamp")) or datetime.min, reverse=True)
+        
         seen = set()
-        for doc in db.collection("sensor_data")\
-                      .order_by("timestamp", direction=firestore.Query.DESCENDING).stream():
+        for doc in all_sensors:
             row = doc.to_dict()
             tid = row.get("toilet_id")
             if tid in seen:
                 continue
             seen.add(tid)
             loc = toilet_map.get(tid, {}).get("location", f"Toilet {tid}")
-            if row.get("odour_level", 0) > ODOUR_THRESHOLD:
+            
+            status = str(row.get("status", "")).upper()
+            if status == "DIRTY" or row.get("odour_level", 0) > ODOUR_THRESHOLD:
                 alerts.append({"toilet_id": tid, "location": loc,
-                                "type": "HIGH_ODOUR", "message": "High odour detected."})
-            if row.get("usage_count", 0) > USAGE_THRESHOLD:
+                                "type": "HIGH_ODOUR", "message": "Dirty toilet or high odour detected."})
+            elif row.get("usage_count", 0) > USAGE_THRESHOLD:
                 alerts.append({"toilet_id": tid, "location": loc,
                                 "type": "HIGH_USAGE", "message": "High usage detected."})
         return jsonify(alerts)
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify([])
 
 
