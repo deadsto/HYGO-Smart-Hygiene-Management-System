@@ -118,14 +118,29 @@ def login():
                   .where("username", "==", username)\
                   .where("password", "==", password).stream():
         u = doc.to_dict()
-        return jsonify({"success": True, "role": u.get("role", "admin")})
+        return jsonify({
+            "success": True, 
+            "user": {
+                "username": u.get("username"),
+                "role": u.get("role", "admin"),
+                "name": u.get("name", "Administrator")
+            }
+        })
 
     # Staff check
     for doc in db.collection("staff")\
                   .where("username", "==", username)\
                   .where("password", "==", password).stream():
         s = doc.to_dict()
-        return jsonify({"success": True, "role": "staff", "staff_id": s.get("staff_id")})
+        return jsonify({
+            "success": True, 
+            "user": {
+                "username": s.get("username"),
+                "role": "staff",
+                "staff_id": s.get("staff_id"),
+                "name": s.get("name")
+            }
+        })
 
     return jsonify({"success": False, "message": "Invalid username or password"}), 401
 
