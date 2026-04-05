@@ -14,36 +14,43 @@ export default function Sidebar() {
   return (
     <div className="side">
       <div className="side_header">
-        {/* Circular Back Button */}
+        <div className="logo-section">
+          <span className="logo-icon">💧</span>
+          <div>
+            <h2 className="up-text" style={{margin: 0, fontSize: '20px'}}>HYGO</h2>
+            <p style={{margin: 0, fontSize: '12px', color: '#94a3b8', fontWeight: 400}}>Smart Hygiene</p>
+          </div>
+        </div>
         <button className="back-circle-btn" onClick={handleBack} title="Go Back">
-          ←
+          ‹
         </button>
-        <h2 className="up-text">HYGO</h2>
       </div>
 
       <div className="nav-links-container">
         <NavLink to="/dashboard" className={({ isActive }) => (isActive ? "nav-btn active" : "nav-btn")}>
-          Dashboard
+          <span className="nav-icon">⛾</span> Dashboard
         </NavLink>
         <NavLink to="/staff" className={({ isActive }) => (isActive ? "nav-btn active" : "nav-btn")}>
-          Staff Management
+          <span className="nav-icon">👤</span> Staff Management
         </NavLink>
         <NavLink to="/toilet" className={({ isActive }) => (isActive ? "nav-btn active" : "nav-btn")}>
-          Toilet Status
+          <span className="nav-icon">🚽</span> Toilet Status
         </NavLink>
         <NavLink to="/alerts" className={({ isActive }) => (isActive ? "nav-btn active" : "nav-btn")}>
-          Alerts & Feedback
+          <span className="nav-icon">⚠️</span> Alerts & Feedback
         </NavLink>
         <NavLink to="/reports" className={({ isActive }) => (isActive ? "nav-btn active" : "nav-btn")}>
-          Reports
+          <span className="nav-icon">📊</span> Reports
         </NavLink>
       </div>
 
-      {/* Aesthetic Logout Section */}
       <div className="sidebar-footer">
-        <button className="logout-card-btn" onClick={handleLogout}>
-          <span className="logout-icon">Logout to Login</span>
-        </button>
+        <div className="nav-btn" style={{cursor: "pointer"}}>
+          <span className="nav-icon">⚙️</span> Settings
+        </div>
+        <div className="nav-btn" style={{cursor: "pointer", color: "#e2e8f0"}} onClick={handleLogout}>
+          <span className="nav-icon">🚪</span> Logout
+        </div>
       </div>
     </div>
   );

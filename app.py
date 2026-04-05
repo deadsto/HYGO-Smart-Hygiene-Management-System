@@ -22,6 +22,13 @@ ODOUR_THRESHOLD = 6
 USAGE_THRESHOLD = 30
 CLEANING_TIME_LIMIT_HOURS = 6
 
+# 🚀 MEMORY CACHE (Reduces Firebase Quota usage by sharing data)
+cache = {
+    "toilets": {"data": None, "time": datetime.min},
+    "alerts": {"data": None, "time": datetime.min},
+    "ttl": 10 # 10 seconds cache time
+}
+
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
@@ -29,13 +36,15 @@ CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 # Firebase / Firestore Init
 # --------------------
 if not firebase_admin._apps:
-    service_account_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT")
-    if service_account_json:
-        # Render / production: JSON string stored as env variable
-        cred = credentials.Certificate(json.loads(service_account_json))
-    else:
-        # Local dev: place serviceAccountKey.json in project root
+    if os.path.exists("serviceAccountKey.json"):
+        # Use the local file directly (fastest for deployment)
         cred = credentials.Certificate("serviceAccountKey.json")
+    else:
+        service_account_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT")
+        if service_account_json:
+            cred = credentials.Certificate(json.loads(service_account_json))
+        else:
+            raise Exception("No Firebase credentials found!")
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
@@ -179,6 +188,11 @@ def staff_management():
 @app.route("/api/toilets", methods=["GET", "POST"])
 def toilets():
     if request.method == "GET":
+        # 💎 CACHE CHECK (Prevents Firebase Quota waste)
+        now = datetime.now()
+        if cache["toilets"]["data"] and (now - cache["toilets"]["time"]).seconds < cache["ttl"]:
+            return jsonify(cache["toilets"]["data"])
+
         try:
             toilet_docs = list(db.collection("toilets").stream())
             
@@ -211,6 +225,10 @@ def toilets():
                 if sensor_status:
                     t["status"] = str(sensor_status).lower()
                 result.append(serialize(t))
+            
+            # UPDATE CACHE
+            cache["toilets"]["data"] = result
+            cache["toilets"]["time"] = now
             return jsonify(result), 200
         except Exception as e:
             import traceback
@@ -240,6 +258,11 @@ def toilets():
 # --------------------
 @app.route("/api/cleaning-alerts")
 def cleaning_alerts():
+    # 💎 CACHE CHECK
+    now = datetime.now()
+    if cache["alerts"]["data"] and (now - cache["alerts"]["time"]).seconds < cache["ttl"]:
+        return jsonify(cache["alerts"]["data"])
+
     try:
         alerts = []
         toilet_map = {
@@ -267,6 +290,10 @@ def cleaning_alerts():
             elif row.get("usage_count", 0) > USAGE_THRESHOLD:
                 alerts.append({"toilet_id": tid, "location": loc,
                                 "type": "HIGH_USAGE", "message": "High usage detected."})
+        
+        # UPDATE CACHE
+        cache["alerts"]["data"] = alerts
+        cache["alerts"]["time"] = now
         return jsonify(alerts)
     except Exception as e:
         import traceback
@@ -375,7 +402,8 @@ def predict_from_db():
             results.append({"toilet_id": tid, "predicted_minutes": int(prediction), "status": status})
         return jsonify(results)
     except Exception as e:
-        return jsonify([])
+        import traceback
+        return jsonify({"error": str(e), "trace": traceback.format_exc()})
 
 
 # --------------------

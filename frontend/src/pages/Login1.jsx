@@ -1,62 +1,41 @@
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import "../styles/log.css";
 import mopLogo from "../img_vid/mop_hygo1.png";
 
 export default function Login() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [error, setError] = useState("");
 
-const navigate = useNavigate();
-const [searchParams] = useSearchParams();
+  const role = searchParams.get("role");
 
-const role = searchParams.get("role");
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
 
-const handleLogin = async (e) => {
+  const username = e.target.email.value;
+  const password = e.target.password.value;
 
-e.preventDefault();
+    try {
+      const response = await fetch("https://hygo-smart-hygiene-management-system-4os1.onrender.com/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
 
-const username = e.target.email.value;
-const password = e.target.password.value;
+    const data = await response.json();
 
-try {
-
-  const res = await fetch("https://hygo-smart-hygiene-management-system-4os1.onrender.com/api/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      username: username,
-      password: password
-    })
-  });
-  console.log("updated");
-
-  const data = await res.json();
-
-  if (!data.success) {
-    alert("Invalid username or password");
-    return;
+    if (response.ok) {
+      localStorage.setItem("user", JSON.stringify(data.user));
+      navigate("/dashboard");
+    } else {
+      setError(data.error || "Login failed");
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+    setError("Server connection failed. Make sure the backend is running.");
   }
-
-  // ADMIN LOGIN
-  if (data.role === "admin") {
-    navigate("/dashboard");
-  }
-
-  // STAFF LOGIN
-  if (data.role === "staff") {
-
-    localStorage.setItem("staff_id", data.staff_id);
-
-    navigate("/staff-dashboard");
-  }
-
-} catch (err) {
-
-  console.log(err);
-  alert("Login failed");
-
-}
-
 };
 
 return (

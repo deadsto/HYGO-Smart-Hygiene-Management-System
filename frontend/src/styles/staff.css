@@ -113,15 +113,16 @@
 }
 
 .staff-tags {
-  margin-top: 14px;
+  margin-top: 20px;
   display: flex;
   gap: 10px;
 }
 
 .tag {
   padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 13px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .tag.on {
@@ -130,25 +131,80 @@
 }
 
 .tag.off {
-  background: #e5e7eb;
-  color: #475569;
+  background: #f3f4f6;
+  color: #4b5563;
 }
 
-.tag.role {
-  background: #e0e7ff;
-  color: #4338ca;
+.tag.role.cleaner {
+  background: #e0f2fe;
+  color: #0284c7;
 }
 
-.tag.supervisor {
-  background: #ede9fe;
-  color: #6d28d9;
+.tag.role.supervisor {
+  background: #f3e8ff;
+  color: #9333ea;
 }
 
 .add-btn {
   background: #059669;
   color: white;
   padding: 10px 16px;
-  border-radius: 10px;
+  border-radius: 8px;
   border: none;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.search-wrap {
+  position: relative;
+  flex: 1;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.staff-controls input {
+  padding-left: 40px;
+}
+
+.staff-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.staff-titles h3 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  color: #1f2937;
+}
+
+.staff-info-rows {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.staff-info-rows p {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-btn {
+  color: #9ca3af;
+  font-size: 16px;
 }
