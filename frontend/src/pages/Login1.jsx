@@ -48,6 +48,8 @@ return (
       <img src={mopLogo} alt="Company Logo" className="app-logo" />
     </div>
 
+    {error && <div style={{ color: "#ef4444", marginBottom: "15px", fontWeight: "500", textAlign: "center" }}>{error}</div>}
+
     <h1>{role === "admin" ? "Admin Login" : "Staff Login"}</h1>
 
     <p className="subtitle">
